@@ -1,35 +1,48 @@
-import React from "react";
+import React, { useRef } from "react";
 import { ThemeConfig } from "../types";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { motion, useDragControls } from "motion/react";
 import { 
-  MessageSquare, 
-  Search, 
-  Plus, 
-  Settings, 
-  User, 
-  Mic, 
-  Image as ImageIcon, 
-  Music, 
-  PenTool, 
-  HelpCircle,
-  ChevronDown,
-  LayoutGrid,
-  Sparkles,
-  MoreHorizontal
-} from "lucide-react";
+  faPlus, 
+  faCommentAlt, 
+  faSearch, 
+  faMagic, 
+  faEllipsisH, 
+  faChevronDown, 
+  faThLarge, 
+  faUser, 
+  faMicrophone, 
+  faImage, 
+  faMusic, 
+  faPen, 
+  faQuestionCircle,
+  faRobot,
+  faPlay,
+  faGripVertical
+} from "@fortawesome/free-solid-svg-icons";
 
 interface ChatPreviewProps {
   theme: ThemeConfig;
   platform: "chatgpt" | "gemini";
   onElementClick?: (section: string) => void;
+  onWidgetPositionChange?: (position: { x: number; y: number }) => void;
 }
 
-export const ChatPreview: React.FC<ChatPreviewProps> = ({ theme, platform, onElementClick }) => {
+export const ChatPreview: React.FC<ChatPreviewProps> = ({ 
+  theme, 
+  platform, 
+  onElementClick,
+  onWidgetPositionChange 
+}) => {
   const { colors, fontFamily, borderRadius } = theme;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragControls = useDragControls();
 
   const isChatGPT = platform === "chatgpt";
 
   return (
     <div 
+      ref={containerRef}
       className="w-full h-full flex overflow-hidden border shadow-2xl transition-all duration-500 relative group/preview"
       style={{ 
         backgroundColor: colors.bgPrimary, 
@@ -42,7 +55,7 @@ export const ChatPreview: React.FC<ChatPreviewProps> = ({ theme, platform, onEle
       {/* Background Image Layer */}
       {colors.backgroundImage && (
         <div 
-          className="absolute inset-0 z-0 pointer-events-none transition-opacity duration-500"
+          className="absolute inset-0 z-0 transition-opacity duration-500 cursor-pointer"
           style={{ 
             backgroundImage: `url(${colors.backgroundImage})`,
             backgroundSize: colors.backgroundSize || 'cover',
@@ -67,24 +80,24 @@ export const ChatPreview: React.FC<ChatPreviewProps> = ({ theme, platform, onEle
           <div className="flex items-center justify-between mb-4">
             <button className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/5 transition-colors w-full text-left">
               <div className="w-6 h-6 flex items-center justify-center">
-                {isChatGPT ? <Plus className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                <FontAwesomeIcon icon={faPlus} className="text-sm" />
               </div>
               <span className="text-sm font-medium" style={{ color: colors.textPrimary }}>New chat</span>
             </button>
-            {isChatGPT && <button className="p-2 text-zinc-500"><MessageSquare className="w-4 h-4" /></button>}
+            {isChatGPT && <button className="p-2 text-zinc-500"><FontAwesomeIcon icon={faCommentAlt} className="text-xs" /></button>}
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center gap-2 p-2 text-xs font-semibold uppercase tracking-wider opacity-50" style={{ color: colors.textSecondary }}>
-              {isChatGPT ? <><Search className="w-3 h-3" /> Search chats</> : "Gems"}
+              {isChatGPT ? <><FontAwesomeIcon icon={faSearch} className="text-[10px]" /> Search chats</> : "Gems"}
             </div>
             {!isChatGPT && (
               <div className="space-y-1">
                 <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/5 text-sm" style={{ color: colors.textPrimary }}>
-                  <Sparkles className="w-4 h-4" /> drive organizer
+                  <FontAwesomeIcon icon={faMagic} className="text-xs" /> drive organizer
                 </div>
                 <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/5 text-sm" style={{ color: colors.textPrimary }}>
-                  <Sparkles className="w-4 h-4" /> Storybook
+                  <FontAwesomeIcon icon={faMagic} className="text-xs" /> Storybook
                 </div>
               </div>
             )}
@@ -109,7 +122,7 @@ export const ChatPreview: React.FC<ChatPreviewProps> = ({ theme, platform, onEle
               <div className="text-sm font-medium truncate" style={{ color: colors.textPrimary }}>JeFF Chapin</div>
               <div className="text-[10px] opacity-50" style={{ color: colors.textSecondary }}>Plus</div>
             </div>
-            <MoreHorizontal className="w-4 h-4 opacity-50" />
+            <FontAwesomeIcon icon={faEllipsisH} className="text-xs opacity-50" />
           </div>
         </div>
       </div>
@@ -128,13 +141,13 @@ export const ChatPreview: React.FC<ChatPreviewProps> = ({ theme, platform, onEle
               <span className="font-bold text-lg" style={{ color: colors.textPrimary }}>
                 {isChatGPT ? "ChatGPT" : "Gemini"}
               </span>
-              <ChevronDown className="w-4 h-4 opacity-50" />
+              <FontAwesomeIcon icon={faChevronDown} className="text-[10px] opacity-50" />
             </button>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex gap-2">
-              <button className="p-2 rounded-full hover:bg-white/5"><LayoutGrid className="w-5 h-5 opacity-50" /></button>
-              <button className="p-2 rounded-full hover:bg-white/5"><User className="w-5 h-5 opacity-50" /></button>
+              <button className="p-2 rounded-full hover:bg-white/5"><FontAwesomeIcon icon={faThLarge} className="text-sm opacity-50" /></button>
+              <button className="p-2 rounded-full hover:bg-white/5"><FontAwesomeIcon icon={faUser} className="text-sm opacity-50" /></button>
             </div>
           </div>
         </div>
@@ -195,21 +208,21 @@ export const ChatPreview: React.FC<ChatPreviewProps> = ({ theme, platform, onEle
                 onClick={(e) => { e.stopPropagation(); onElementClick?.("bgSecondary"); }}
               >
                 <div className="flex items-center gap-3 flex-1">
-                  <Plus className="w-5 h-5 opacity-50" />
-                  {!isChatGPT && <LayoutGrid className="w-5 h-5 opacity-50" />}
+                  <FontAwesomeIcon icon={faPlus} className="text-sm opacity-50" />
+                  {!isChatGPT && <FontAwesomeIcon icon={faThLarge} className="text-sm opacity-50" />}
                   <div className="flex-1 text-base opacity-40" style={{ color: colors.textPrimary }}>
                     {isChatGPT ? "Ask anything" : "Ask Gemini"}
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Mic className="w-5 h-5 opacity-50" />
+                  <FontAwesomeIcon icon={faMicrophone} className="text-sm opacity-50" />
                   {isChatGPT ? (
                     <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
                       <div className="w-3 h-3 bg-black rounded-sm" />
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/5 text-xs font-medium opacity-50">
-                      Pro <ChevronDown className="w-3 h-3" />
+                      Pro <FontAwesomeIcon icon={faChevronDown} className="text-[10px]" />
                     </div>
                   )}
                 </div>
@@ -219,10 +232,10 @@ export const ChatPreview: React.FC<ChatPreviewProps> = ({ theme, platform, onEle
               {!isChatGPT && (
                 <div className="flex flex-wrap justify-center gap-2">
                   {[
-                    { icon: <ImageIcon className="w-3 h-3" />, label: "Create image" },
-                    { icon: <Music className="w-3 h-3" />, label: "Create music" },
-                    { icon: <PenTool className="w-3 h-3" />, label: "Write anything" },
-                    { icon: <HelpCircle className="w-3 h-3" />, label: "Help me learn" }
+                    { icon: <FontAwesomeIcon icon={faImage} className="text-[10px]" />, label: "Create image" },
+                    { icon: <FontAwesomeIcon icon={faMusic} className="text-[10px]" />, label: "Create music" },
+                    { icon: <FontAwesomeIcon icon={faPen} className="text-[10px]" />, label: "Write anything" },
+                    { icon: <FontAwesomeIcon icon={faQuestionCircle} className="text-[10px]" />, label: "Help me learn" }
                   ].map((chip, i) => (
                     <button 
                       key={i}
@@ -247,6 +260,75 @@ export const ChatPreview: React.FC<ChatPreviewProps> = ({ theme, platform, onEle
           </p>
         </div>
       </div>
+
+      {/* Music Widget Overlay */}
+      {theme.musicWidget?.isVisible && theme.musicWidget.playlistId && (
+        <motion.div 
+          drag
+          dragControls={dragControls}
+          dragListener={false}
+          dragConstraints={containerRef}
+          dragMomentum={false}
+          onDragEnd={(_, info) => {
+            onWidgetPositionChange?.({ x: info.offset.x, y: info.offset.y });
+          }}
+          className="absolute bottom-24 right-6 z-20 w-64 shadow-2xl group/widget"
+          initial={false}
+          animate={{ 
+            x: theme.musicWidget.position?.x || 0, 
+            y: theme.musicWidget.position?.y || 0,
+            opacity: 1
+          }}
+          transition={{ type: "spring", damping: 25, stiffness: 200 }}
+        >
+          <div 
+            className="p-1 rounded-2xl border backdrop-blur-xl overflow-hidden relative"
+            style={{ 
+              backgroundColor: `${colors.bgSecondary}dd`,
+              borderColor: colors.border
+            }}
+          >
+            {/* Drag Handle */}
+            <div 
+              onPointerDown={(e) => dragControls.start(e)}
+              className="absolute top-1 right-1 z-30 opacity-0 group-hover/widget:opacity-100 transition-opacity cursor-move"
+            >
+              <div className="bg-black/50 rounded-full p-1 px-2 flex items-center gap-1">
+                <FontAwesomeIcon icon={faGripVertical} className="text-[10px] text-white/50" />
+              </div>
+            </div>
+
+            {theme.musicWidget.provider === 'spotify' && (
+              <iframe
+                src={`https://open.spotify.com/embed/playlist/${theme.musicWidget.playlistId.split('/').pop()?.split('?')[0]}?utm_source=generator&theme=0`}
+                width="100%"
+                height="80"
+                frameBorder="0"
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"
+                className="rounded-xl"
+              />
+            )}
+            {theme.musicWidget.provider === 'youtube' && (
+              <iframe
+                src={`https://www.youtube.com/embed/videoseries?list=${theme.musicWidget.playlistId.split('list=')[1]?.split('&')[0] || theme.musicWidget.playlistId}`}
+                width="100%"
+                height="80"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="rounded-xl"
+              />
+            )}
+            {theme.musicWidget.provider === 'pandora' && (
+              <div className="h-[80px] flex flex-col items-center justify-center bg-zinc-900/50 rounded-xl">
+                <FontAwesomeIcon icon={faPlay} className="text-xl text-blue-500 mb-1" />
+                <span className="text-[10px] font-bold text-zinc-400">Pandora</span>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 };

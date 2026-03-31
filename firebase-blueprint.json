@@ -1,0 +1,62 @@
+{
+  "entities": {
+    "Theme": {
+      "title": "Theme",
+      "description": "A UI theme for the skin editor",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "author": { "type": "string" },
+        "authorId": { "type": "string" },
+        "price": { "type": "number" },
+        "fontFamily": { "type": "string" },
+        "borderRadius": { "type": "string" },
+        "isPublic": { "type": "boolean" },
+        "colors": {
+          "type": "object",
+          "properties": {
+            "bgPrimary": { "type": "string" },
+            "bgSecondary": { "type": "string" },
+            "textPrimary": { "type": "string" },
+            "textSecondary": { "type": "string" },
+            "accent": { "type": "string" },
+            "userBubble": { "type": "string" },
+            "aiBubble": { "type": "string" },
+            "border": { "type": "string" },
+            "backgroundImage": { "type": "string" },
+            "backgroundOpacity": { "type": "number" },
+            "backgroundSize": { "type": "string" },
+            "backgroundPosition": { "type": "string" }
+          }
+        }
+      },
+      "required": ["id", "name", "author", "price", "colors"]
+    },
+    "Purchase": {
+      "title": "Purchase",
+      "description": "A record of a theme purchase",
+      "type": "object",
+      "properties": {
+        "themeId": { "type": "string" },
+        "canCustomize": { "type": "boolean" },
+        "purchasedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["themeId", "canCustomize", "purchasedAt"]
+    }
+  },
+  "firestore": {
+    "/themes/{themeId}": {
+      "schema": "Theme",
+      "description": "Marketplace themes"
+    },
+    "/users/{userId}/purchases/{themeId}": {
+      "schema": "Purchase",
+      "description": "User theme purchases"
+    },
+    "/users/{userId}/custom_themes/{themeId}": {
+      "schema": "Theme",
+      "description": "User created or customized themes"
+    }
+  }
+}

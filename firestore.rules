@@ -1,0 +1,105 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: themes
+    // Document ID: themeId
+    // Fields:
+    //   - id: string (required)
+    //   - name: string (required, size < 50)
+    //   - author: string (required, size < 50)
+    //   - authorId: string (optional)
+    //   - price: number (required, >= 0)
+    //   - fontFamily: string (optional)
+    //   - borderRadius: string (optional)
+    //   - isPublic: bool (optional)
+    //   - colors: map (required)
+    //
+    // Collection: users/{userId}/purchases
+    // Document ID: themeId
+    // Fields:
+    //   - themeId: string (required)
+    //   - canCustomize: bool (required)
+    //   - purchasedAt: string (required, ISO 8601)
+    //
+    // Collection: users/{userId}/custom_themes
+    // Document ID: themeId
+    // Fields:
+    //   - [Same as Theme]
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "jefchapin@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidTheme(data) {
+      return data.keys().hasAll(['id', 'name', 'author', 'price', 'colors']) &&
+        data.id is string && data.id.size() > 0 && data.id.size() < 50 &&
+        data.name is string && data.name.size() > 0 && data.name.size() < 50 &&
+        data.author is string && data.author.size() > 0 && data.author.size() < 50 &&
+        data.price is number && data.price >= 0 &&
+        data.colors is map &&
+        (!('fontFamily' in data) || (data.fontFamily is string && data.fontFamily.size() < 50)) &&
+        (!('borderRadius' in data) || (data.borderRadius is string && data.borderRadius.size() < 20)) &&
+        (!('isPublic' in data) || data.isPublic is bool);
+    }
+
+    function isValidPurchase(data) {
+      return data.keys().hasAll(['themeId', 'canCustomize', 'purchasedAt']) &&
+        data.themeId is string && data.themeId.size() > 0 && data.themeId.size() < 50 &&
+        data.canCustomize is bool &&
+        data.purchasedAt is string && data.purchasedAt.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*Z?$");
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    // Marketplace Themes
+    match /themes/{themeId} {
+      allow read: if true; // Publicly readable
+      allow create: if isAuthenticated() && isValidTheme(request.resource.data) && (isAdmin() || request.resource.data.authorId == request.auth.uid);
+      allow update: if isAuthenticated() && isValidTheme(request.resource.data) && (isAdmin() || resource.data.authorId == request.auth.uid);
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
+    }
+
+    // User Purchases
+    match /users/{userId}/purchases/{themeId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidPurchase(request.resource.data);
+      allow update: if isOwner(userId) && isValidPurchase(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // User Custom Themes
+    match /users/{userId}/custom_themes/{themeId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidTheme(request.resource.data);
+      allow update: if isOwner(userId) && isValidTheme(request.resource.data);
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
+    // User Profiles (for Admin check)
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create, update: if isOwner(userId) && (!('role' in request.resource.data) || isAdmin());
+    }
+  }
+}
